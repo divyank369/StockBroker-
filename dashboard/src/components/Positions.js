@@ -21,6 +21,9 @@ const Positions = () => {
     };
 
     loadPositions();
+    const interval = setInterval(loadPositions, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -58,7 +61,9 @@ const Positions = () => {
                     <td>{stock.qty}</td>
                     <td>{stock.avg.toFixed(2)}</td>
                     <td>{stock.price.toFixed(2)}</td>
-                    <td className={profClass}>{(currValue - stock.avg * stock.qty).toFixed(2)}</td>
+                    <td className={profClass}>
+                      {(currValue - stock.avg * stock.qty).toFixed(2)}
+                    </td>
                     <td className={dayClass}>{stock.day}</td>
                   </tr>
                 );

@@ -1,22 +1,31 @@
 import axios from "axios";
 
-import { getStoredAuth } from "../auth/storage";
 import { API_BASE_URL } from "../config";
+import { getStoredAuth } from "../auth/storage";
 
-export const publicApi = axios.create({
-  baseURL: API_BASE_URL,
-});
+const createClient = (includeAuth = false) => {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+  });
 
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-});
+  if (includeAuth) {
+    client.interceptors.request.use((config) => {
+      const authState = getStoredAuth();
+      const token = authState?.token;
 
-apiClient.interceptors.request.use((config) => {
-  const auth = getStoredAuth();
+      if (token) {
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${token}`,
+        };
+      }
 
-  if (auth?.token) {
-    config.headers.Authorization = `Bearer ${auth.token}`;
+      return config;
+    });
   }
 
-  return config;
-});
+  return client;
+};
+
+export const publicApi = createClient(false);
+export const apiClient = createClient(true);

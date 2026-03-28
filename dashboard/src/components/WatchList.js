@@ -7,9 +7,14 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 
+import { buildApiUrl } from "../config";
 import { watchlist } from "../data/data";
 import GeneralContext from "./GeneralContext";
 import { DoughnutGraph } from "./DoughnutGraph";
+
+const LIVE_SYMBOL_ALIASES = {
+  HUL: "HINDUNILVR",
+};
 
 const WatchList = () => {
   const [stocks, setStocks] = useState(watchlist);
@@ -21,18 +26,25 @@ const WatchList = () => {
         const updated = await Promise.all(
           watchlist.map(async (stock) => {
             const symbol = stock.name.toUpperCase();
+            const liveSymbol = LIVE_SYMBOL_ALIASES[symbol] || symbol;
+            const response = await fetch(
+              buildApiUrl(`/stocks/price/${encodeURIComponent(liveSymbol)}`)
+            );
 
-            const res = await fetch(`/api/stocks/price/${symbol}`);
-            const data = await res.json();
+            if (!response.ok) {
+              throw new Error(`Unable to fetch market data for ${symbol}`);
+            }
+
+            const data = await response.json();
 
             return {
               ...stock,
               price: data.price ?? stock.price,
               percent:
                 data.percent !== undefined
-                  ? data.percent.toFixed(2) + "%"
+                  ? `${Number(data.percent).toFixed(2)}%`
                   : stock.percent,
-              isDown: data.change < 0,
+              isDown: Number(data.change) < 0,
             };
           })
         );
@@ -41,17 +53,17 @@ const WatchList = () => {
         setLoading(false);
       } catch (err) {
         console.error("API error:", err);
+        setLoading(false);
       }
     };
 
     fetchData();
 
-    const interval = setInterval(fetchData, 5000); // refresh every 5 sec
+    const interval = setInterval(fetchData, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Dynamic chart data
   const labels = stocks.map((stock) => stock.name);
 
   const data = {
@@ -101,8 +113,6 @@ const WatchList = () => {
 
 export default WatchList;
 
-// ================= ITEM =================
-
 const WatchListItem = ({ stock }) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -125,14 +135,12 @@ const WatchListItem = ({ stock }) => {
             <KeyboardArrowUp className="up" />
           )}
 
-          <span className="price">₹{stock.price}</span>
+          <span className="price">Rs {stock.price}</span>
         </div>
       </div>
     </li>
   );
 };
-
-// ================= ACTIONS =================
 
 const WatchListActions = ({ uid }) => {
   const { openBuyWindow } = useContext(GeneralContext);
@@ -140,26 +148,22 @@ const WatchListActions = ({ uid }) => {
   return (
     <span className="actions">
       <span>
-        {/* BUY */}
         <Tooltip title="Buy (B)" placement="top" arrow TransitionComponent={Grow}>
           <button className="buy" onClick={() => openBuyWindow(uid)}>
             Buy
           </button>
         </Tooltip>
 
-        {/* SELL */}
         <Tooltip title="Sell (S)" placement="top" arrow TransitionComponent={Grow}>
           <button className="sell">Sell</button>
         </Tooltip>
 
-        {/* ANALYTICS */}
         <Tooltip title="Analytics" placement="top" arrow TransitionComponent={Grow}>
           <button>
             <BarChartOutlined className="icon" />
           </button>
         </Tooltip>
 
-        {/* MORE */}
         <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
           <button>
             <MoreHoriz className="icon" />

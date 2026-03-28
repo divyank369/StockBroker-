@@ -10,6 +10,8 @@ node_modules/
 build/
 dist/
 .env
+frontend/build/
+dashboard/build/
 
 # testing
 /coverage

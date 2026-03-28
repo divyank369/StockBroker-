@@ -22,26 +22,33 @@ const Holdings = () => {
     };
 
     loadHoldings();
+    const interval = setInterval(loadHoldings, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const totalInvestment = allHoldings.reduce((total, stock) => total + stock.avg * stock.qty, 0);
-  const currentValue = allHoldings.reduce((total, stock) => total + stock.price * stock.qty, 0);
+  const totalInvestment = allHoldings.reduce(
+    (total, stock) => total + stock.avg * stock.qty,
+    0
+  );
+  const currentValue = allHoldings.reduce(
+    (total, stock) => total + stock.price * stock.qty,
+    0
+  );
   const pnl = currentValue - totalInvestment;
 
-  
+  const labels = allHoldings.map((stock) => stock.name);
 
-    const labels  =allHoldings.map((subArray) => subArray["name"]);
-
-    const data = {
-      labels,
-      datasets:[{
-        label:  "Stock Price ",
-        data:allHoldings.map((stock)=>stock.price),
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      }]
-    }
-
-
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Stock Price ",
+        data: allHoldings.map((stock) => stock.price),
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
 
   return (
     <>
@@ -80,7 +87,9 @@ const Holdings = () => {
                       <td>{stock.avg.toFixed(2)}</td>
                       <td>{stock.price.toFixed(2)}</td>
                       <td>{currValue.toFixed(2)}</td>
-                      <td className={profClass}>{(currValue - stock.avg * stock.qty).toFixed(2)}</td>
+                      <td className={profClass}>
+                        {(currValue - stock.avg * stock.qty).toFixed(2)}
+                      </td>
                       <td className={profClass}>{stock.net}</td>
                       <td className={dayClass}>{stock.day}</td>
                     </tr>
@@ -92,15 +101,11 @@ const Holdings = () => {
 
           <div className="row">
             <div className="col">
-              <h5>
-                {totalInvestment.toFixed(2)}<span></span>
-              </h5>
+              <h5>{totalInvestment.toFixed(2)}</h5>
               <p>Total investment</p>
             </div>
             <div className="col">
-              <h5>
-                {currentValue.toFixed(2)}<span></span>
-              </h5>
+              <h5>{currentValue.toFixed(2)}</h5>
               <p>Current value</p>
             </div>
             <div className="col">
@@ -112,7 +117,7 @@ const Holdings = () => {
           </div>
         </>
       ) : null}
-      <VerticalGraph data= {data}/>
+      <VerticalGraph data={data} />
     </>
   );
 };
