@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { apiClient } from "../api/client";
+import { VerticalGraph } from "./VerticalGraph";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
@@ -26,6 +27,21 @@ const Holdings = () => {
   const totalInvestment = allHoldings.reduce((total, stock) => total + stock.avg * stock.qty, 0);
   const currentValue = allHoldings.reduce((total, stock) => total + stock.price * stock.qty, 0);
   const pnl = currentValue - totalInvestment;
+
+  
+
+    const labels  =allHoldings.map((subArray) => subArray["name"]);
+
+    const data = {
+      labels,
+      datasets:[{
+        label:  "Stock Price ",
+        data:allHoldings.map((stock)=>stock.price),
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      }]
+    }
+
+
 
   return (
     <>
@@ -96,6 +112,7 @@ const Holdings = () => {
           </div>
         </>
       ) : null}
+      <VerticalGraph data= {data}/>
     </>
   );
 };

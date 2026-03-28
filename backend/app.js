@@ -1,3 +1,4 @@
+const stockRoutes = require("./routes/stockRoutes");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -19,6 +20,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api", tradingRoutes);
 app.use("/", tradingRoutes);
 
+
+app.use("/api/stocks", stockRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
